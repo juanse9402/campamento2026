@@ -12,8 +12,11 @@ import { Nino, Asistencia } from '@/types';
 
 // ─── Keys ─────────────────────────────────────────────────────────────────────
 const NINOS_CACHE_KEY  = 'campamento_ninos_v1';
+const CUIDADORES_CACHE_KEY = 'campamento_cuidadores_v1';
 const ASIST_CACHE_KEY  = (fecha: string) => `campamento_asist_${fecha}`;
+const ASIST_CUIDADORES_CACHE_KEY = (fecha: string) => `campamento_asist_cuidadores_${fecha}`;
 const QUEUE_KEY        = 'campamento_pending_v1';
+const QUEUE_CUIDADORES_KEY = 'campamento_pending_cuidadores_v1';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface PendingItem {
@@ -21,6 +24,13 @@ export interface PendingItem {
   fecha:     string;
   asistio:   boolean;
   queued_at: string; // ISO timestamp
+}
+
+export interface PendingCuidadorItem {
+  cuidador_id: string;
+  fecha:       string;
+  asistio:     boolean;
+  queued_at:   string;
 }
 
 // ─── Safe localStorage helpers ────────────────────────────────────────────────
@@ -57,6 +67,17 @@ export function loadNinosCache(): Nino[] {
   return lsGet<Nino[]>(NINOS_CACHE_KEY, []);
 }
 
+// ─── Cuidadores cache ─────────────────────────────────────────────────────────
+import { Cuidador, AsistenciaCuidador } from '@/types';
+
+export function saveCuidadoresCache(cuidadores: Cuidador[]): void {
+  lsSet(CUIDADORES_CACHE_KEY, cuidadores);
+}
+
+export function loadCuidadoresCache(): Cuidador[] {
+  return lsGet<Cuidador[]>(CUIDADORES_CACHE_KEY, []);
+}
+
 // ─── Asistencias cache ────────────────────────────────────────────────────────
 export function saveAsistenciasCache(
   fecha: string,
@@ -69,9 +90,24 @@ export function loadAsistenciasCache(fecha: string): Record<string, Asistencia> 
   return lsGet<Record<string, Asistencia>>(ASIST_CACHE_KEY(fecha), {});
 }
 
-// ─── Pending queue ────────────────────────────────────────────────────────────
+export function saveAsistenciasCuidadoresCache(
+  fecha: string,
+  asistencias: Record<string, AsistenciaCuidador>
+): void {
+  lsSet(ASIST_CUIDADORES_CACHE_KEY(fecha), asistencias);
+}
+
+export function loadAsistenciasCuidadoresCache(fecha: string): Record<string, AsistenciaCuidador> {
+  return lsGet<Record<string, AsistenciaCuidador>>(ASIST_CUIDADORES_CACHE_KEY(fecha), {});
+}
+
+// ─── Pending queues ───────────────────────────────────────────────────────────
 export function getQueue(): PendingItem[] {
   return lsGet<PendingItem[]>(QUEUE_KEY, []);
+}
+
+export function getCuidadoresQueue(): PendingCuidadorItem[] {
+  return lsGet<PendingCuidadorItem[]>(QUEUE_CUIDADORES_KEY, []);
 }
 
 /**
@@ -89,6 +125,17 @@ export function enqueue(item: Omit<PendingItem, 'queued_at'>): void {
   lsSet(QUEUE_KEY, queue);
 }
 
+export function enqueueCuidador(item: Omit<PendingCuidadorItem, 'queued_at'>): void {
+  const queue = getCuidadoresQueue();
+  const idx = queue.findIndex(
+    q => q.cuidador_id === item.cuidador_id && q.fecha === item.fecha
+  );
+  const entry: PendingCuidadorItem = { ...item, queued_at: new Date().toISOString() };
+  if (idx >= 0) queue[idx] = entry;
+  else queue.push(entry);
+  lsSet(QUEUE_CUIDADORES_KEY, queue);
+}
+
 /** Removes a successfully synced item from the queue. */
 export function dequeue(nino_id: string, fecha: string): void {
   const queue = getQueue().filter(
@@ -97,10 +144,21 @@ export function dequeue(nino_id: string, fecha: string): void {
   lsSet(QUEUE_KEY, queue);
 }
 
+export function dequeueCuidador(cuidador_id: string, fecha: string): void {
+  const queue = getCuidadoresQueue().filter(
+    q => !(q.cuidador_id === cuidador_id && q.fecha === fecha)
+  );
+  lsSet(QUEUE_CUIDADORES_KEY, queue);
+}
+
 export function clearQueue(): void {
   lsDel(QUEUE_KEY);
 }
 
 export function pendingCount(): number {
   return getQueue().length;
+}
+
+export function pendingCuidadoresCount(): number {
+  return getCuidadoresQueue().length;
 }

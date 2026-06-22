@@ -20,3 +20,19 @@ export interface Asistencia {
   /** Columna real en Supabase: 'asistio' */
   asistio: boolean;
 }
+
+export interface Cuidador {
+  id: string;
+  nombre: string;
+  apellido: string;
+  grupo?: string;
+  telefono?: string;
+  rol?: string;
+}
+
+export interface AsistenciaCuidador {
+  id: string;
+  cuidador_id: string;
+  fecha: string;
+  asistio: boolean;
+}
