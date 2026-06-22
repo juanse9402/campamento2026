@@ -110,9 +110,6 @@ function MedicalAlert({ observacion }: { observacion: string }) {
   );
 }
 
-// ─── Constantes ───────────────────────────────────────────────────────────────
-const GRUPOS = ['Todos', 'Logística', 'Cocina', 'Seguridad', 'Líderes', 'General'];
-
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function CuidadoresAttendance() {
   const todayStr  = getTodayLocalStr();
@@ -124,7 +121,6 @@ export default function CuidadoresAttendance() {
   const [loading, setLoading]         = useState(true);
   const [diagError, setDiagError]     = useState('');
   const [searchTerm, setSearchTerm]   = useState('');
-  const [selectedGrupo, setSelectedGrupo] = useState('Todos');
   const [statusFilter, setStatusFilter] = useState<'all' | 'present' | 'absent'>('all');
 
   // Toast
@@ -318,9 +314,7 @@ export default function CuidadoresAttendance() {
 
   // ── Filtrado ──────────────────────────────────────────────────────────────
   const baseCuidadores = cuidadores.filter(n => {
-    const matchSearch = `${n.nombre} ${n.apellido}`.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchGrupo  = selectedGrupo === 'Todos' || (n.grupo ?? '').toLowerCase() === selectedGrupo.toLowerCase();
-    return matchSearch && matchGrupo;
+    return `${n.nombre} ${n.apellido}`.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const presentCount = baseCuidadores.filter(n => asistencias[n.id]?.asistio === true).length;
@@ -391,25 +385,6 @@ export default function CuidadoresAttendance() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
-        </div>
-
-        {/* ── Filtro de grupo ────────────────────────────────────────────── */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Grupo</span>
-          </div>
-          <select
-            value={selectedGrupo}
-            onChange={e => setSelectedGrupo(e.target.value)}
-            className="w-full pl-20 pr-10 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-800 font-bold text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all appearance-none cursor-pointer"
-          >
-            {GRUPOS.map(g => (
-              <option key={g} value={g}>{g === 'Todos' ? '👥 Todos los grupos' : `🏷️ ${g}`}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-            <ChevronDown size={18} className="text-slate-400" />
-          </div>
         </div>
 
         {/* ── Estadísticas / Filtros de estado ───────────────────────────── */}
