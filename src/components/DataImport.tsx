@@ -61,6 +61,7 @@ const inputCls =
 function QuickAddForm() {
   const [form, setForm] = useState<FormState>(BLANK_FORM);
   const [saving, setSaving] = useState(false);
+  const [isCuidador, setIsCuidador] = useState(false);
   const [result, setResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const set = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -68,37 +69,48 @@ function QuickAddForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nombre.trim() || !form.apellido.trim() || !form.grupo) {
-      setResult({ type: 'error', text: 'Nombre, Apellido y Grupo son obligatorios.' });
+    if (!form.nombre.trim() || !form.apellido.trim() || (!isCuidador && !form.grupo)) {
+      setResult({ type: 'error', text: `Nombre y Apellido son obligatorios${!isCuidador ? ' junto con el Grupo.' : '.'}` });
       return;
     }
 
     setSaving(true);
     setResult(null);
 
-    const payload = {
-      nombre:            form.nombre.trim(),
-      apellido:          form.apellido.trim(),
-      grupo:             form.grupo,
-      edad:              form.edad ? parseInt(form.edad) : null,
-      sexo:              form.sexo || null,
-      observaciones:     form.observaciones.trim() || null,
-      acudiente_nombre:  form.acudiente_nombre.trim() || null,
-      acudiente_telefono: form.acudiente_telefono.trim() || null,
-    };
-
     try {
       if (IS_MOCK_MODE) {
         // Simulación en modo mock
         await new Promise(r => setTimeout(r, 600));
       } else {
-        const { error } = await supabase.from('ninos').insert([payload]);
-        if (error) throw error;
+        if (isCuidador) {
+          const cuidadorPayload = {
+            nombre: form.nombre.trim(),
+            apellido: form.apellido.trim(),
+            telefono: form.acudiente_telefono.trim() || null,
+            grupo: form.grupo || null,
+            rol: form.observaciones.trim() || null,
+          };
+          const { error } = await supabase.from('cuidadores').insert([cuidadorPayload]);
+          if (error) throw error;
+        } else {
+          const payload = {
+            nombre:            form.nombre.trim(),
+            apellido:          form.apellido.trim(),
+            grupo:             form.grupo,
+            edad:              form.edad ? parseInt(form.edad) : null,
+            sexo:              form.sexo || null,
+            observaciones:     form.observaciones.trim() || null,
+            acudiente_nombre:  form.acudiente_nombre.trim() || null,
+            acudiente_telefono: form.acudiente_telefono.trim() || null,
+          };
+          const { error } = await supabase.from('ninos').insert([payload]);
+          if (error) throw error;
+        }
       }
 
       setResult({
         type: 'success',
-        text: `✅ ${form.nombre} ${form.apellido} registrado en el grupo ${form.grupo}.`,
+        text: `✅ ${form.nombre} ${form.apellido} registrado como ${isCuidador ? 'cuidador' : `niño en ${form.grupo}`}.`,
       });
       setForm(BLANK_FORM);
     } catch (err: unknown) {
@@ -116,7 +128,7 @@ function QuickAddForm() {
       <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5">
         <h2 className="text-white font-black text-xl flex items-center gap-2">
           <UserPlus size={22} />
-          Agregar Niño de Último Momento
+          Agregar Registro de Último Momento
         </h2>
         <p className="text-indigo-200 text-sm mt-1 font-medium">
           Completa los campos y presiona Guardar — se añade directo a Supabase.
@@ -124,6 +136,20 @@ function QuickAddForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+
+        {/* Toggle Cuidador */}
+        <label className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
+          <input
+            type="checkbox"
+            className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+            checked={isCuidador}
+            onChange={(e) => setIsCuidador(e.target.checked)}
+          />
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-slate-800">Registrar como Cuidador</span>
+            <span className="text-xs text-slate-500">Activa esto si la persona es parte del equipo de logística/liderazgo.</span>
+          </div>
+        </label>
 
         {/* Nombre + Apellido */}
         <div className="grid grid-cols-2 gap-3">
@@ -148,87 +174,126 @@ function QuickAddForm() {
         </div>
 
         {/* Grupo */}
-        <Field label="Grupo / Responsable *" icon={<Users size={12} />}>
+        <Field label={isCuidador ? "Grupo / Área (Opcional)" : "Grupo / Responsable *"} icon={<Users size={12} />}>
           <div className="relative">
-            <select
-              className={`${inputCls} appearance-none pr-10 cursor-pointer`}
-              value={form.grupo}
-              onChange={set('grupo')}
-              required
-            >
-              <option value="">— Selecciona un grupo —</option>
-              {GRUPOS.map(g => (
-                <option key={g} value={g}>{g}</option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <ChevronDown size={16} className="text-slate-400" />
-            </div>
-          </div>
-        </Field>
-
-        {/* Edad + Sexo */}
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Edad" icon={<Baby size={12} />}>
-            <input
-              type="number"
-              min="1"
-              max="18"
-              className={inputCls}
-              placeholder="Ej: 9"
-              value={form.edad}
-              onChange={set('edad')}
-            />
-          </Field>
-          <Field label="Sexo" icon={<VenetianMask size={12} />}>
-            <div className="relative">
+            {isCuidador ? (
+              <input
+                className={inputCls}
+                placeholder="Ej: Logística, Cocina, etc."
+                value={form.grupo}
+                onChange={set('grupo')}
+              />
+            ) : (
               <select
                 className={`${inputCls} appearance-none pr-10 cursor-pointer`}
-                value={form.sexo}
-                onChange={set('sexo')}
+                value={form.grupo}
+                onChange={set('grupo')}
+                required
               >
-                <option value="">— Opcional —</option>
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
+                <option value="">— Selecciona un grupo —</option>
+                {GRUPOS.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
               </select>
+            )}
+            {!isCuidador && (
               <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                 <ChevronDown size={16} className="text-slate-400" />
               </div>
-            </div>
-          </Field>
-        </div>
-
-        {/* Acudiente */}
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Nombre Acudiente" icon={<User size={12} />}>
-            <input
-              className={inputCls}
-              placeholder="Ej: Carlos García"
-              value={form.acudiente_nombre}
-              onChange={set('acudiente_nombre')}
-            />
-          </Field>
-          <Field label="Teléfono" icon={<Phone size={12} />}>
-            <input
-              type="tel"
-              className={inputCls}
-              placeholder="Ej: 300-000-0000"
-              value={form.acudiente_telefono}
-              onChange={set('acudiente_telefono')}
-            />
-          </Field>
-        </div>
-
-        {/* Observaciones médicas */}
-        <Field label="Observaciones médicas" icon={<ShieldAlert size={12} />}>
-          <textarea
-            rows={2}
-            className={`${inputCls} resize-none`}
-            placeholder="Alergias, condición especial, instrucciones... (opcional)"
-            value={form.observaciones}
-            onChange={set('observaciones')}
-          />
+            )}
+          </div>
         </Field>
+
+        {/* Campos Condicionales (Niños vs Cuidadores) */}
+        {!isCuidador ? (
+          <>
+            {/* Edad + Sexo */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Edad" icon={<Baby size={12} />}>
+                <input
+                  type="number"
+                  min="1"
+                  max="18"
+                  className={inputCls}
+                  placeholder="Ej: 9"
+                  value={form.edad}
+                  onChange={set('edad')}
+                />
+              </Field>
+              <Field label="Sexo" icon={<VenetianMask size={12} />}>
+                <div className="relative">
+                  <select
+                    className={`${inputCls} appearance-none pr-10 cursor-pointer`}
+                    value={form.sexo}
+                    onChange={set('sexo')}
+                  >
+                    <option value="">— Opcional —</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    <ChevronDown size={16} className="text-slate-400" />
+                  </div>
+                </div>
+              </Field>
+            </div>
+
+            {/* Acudiente */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Nombre Acudiente" icon={<User size={12} />}>
+                <input
+                  className={inputCls}
+                  placeholder="Ej: Carlos García"
+                  value={form.acudiente_nombre}
+                  onChange={set('acudiente_nombre')}
+                />
+              </Field>
+              <Field label="Teléfono" icon={<Phone size={12} />}>
+                <input
+                  type="tel"
+                  className={inputCls}
+                  placeholder="Ej: 300-000-0000"
+                  value={form.acudiente_telefono}
+                  onChange={set('acudiente_telefono')}
+                />
+              </Field>
+            </div>
+
+            {/* Observaciones médicas */}
+            <Field label="Observaciones médicas" icon={<ShieldAlert size={12} />}>
+              <textarea
+                rows={2}
+                className={`${inputCls} resize-none`}
+                placeholder="Alergias, condición especial, instrucciones... (opcional)"
+                value={form.observaciones}
+                onChange={set('observaciones')}
+              />
+            </Field>
+          </>
+        ) : (
+          <>
+            {/* Teléfono Cuidadores */}
+            <Field label="Teléfono (Opcional)" icon={<Phone size={12} />}>
+              <input
+                type="tel"
+                className={inputCls}
+                placeholder="Ej: 300-000-0000"
+                value={form.acudiente_telefono}
+                onChange={set('acudiente_telefono')}
+              />
+            </Field>
+            
+            {/* Rol Cuidadores */}
+            <Field label="Rol Específico (Opcional)" icon={<ShieldAlert size={12} />}>
+              <input
+                className={inputCls}
+                placeholder="Ej: Encargado de sonido, Guardia..."
+                value={form.observaciones}
+                onChange={set('observaciones')}
+              />
+            </Field>
+          </>
+        )}
 
         {/* Feedback */}
         {result && (
