@@ -7,37 +7,36 @@ export default function ReportsPanel() {
   const [activeTab, setActiveTab] = useState<'ninos' | 'cuidadores'>('ninos');
 
   return (
-    <div className="w-full flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-300 relative">
-      <div className="flex bg-slate-200/50 p-1 rounded-2xl mb-5 shadow-inner w-full sm:w-[400px] self-center z-10 shrink-0">
-        <button
-          onClick={() => setActiveTab('ninos')}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'ninos'
-              ? 'bg-white text-indigo-600 shadow-md scale-100'
-              : 'text-slate-500 hover:text-slate-700 scale-95 hover:bg-slate-200/50'
-          }`}
-        >
-          Niños
-        </button>
-        <button
-          onClick={() => setActiveTab('cuidadores')}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'cuidadores'
-              ? 'bg-white text-emerald-600 shadow-md scale-100'
-              : 'text-slate-500 hover:text-slate-700 scale-95 hover:bg-slate-200/50'
-          }`}
-        >
-          Cuidadores
-        </button>
+    <div className="flex flex-col h-full bg-slate-50">
+      {/* Top Navigation Tabs */}
+      <div className="px-4 pt-4 pb-2 bg-slate-50 sticky top-0 z-20">
+        <div className="flex bg-slate-200/60 p-1 rounded-xl shadow-inner border border-slate-200/50">
+          <button
+            onClick={() => setActiveTab('ninos')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'ninos'
+                ? 'bg-white text-indigo-700 shadow shadow-indigo-100'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            <span>🧒</span> Niños
+          </button>
+          <button
+            onClick={() => setActiveTab('cuidadores')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'cuidadores'
+                ? 'bg-white text-emerald-700 shadow shadow-emerald-100'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            <span>🛡️</span> Cuidadores
+          </button>
+        </div>
       </div>
 
-      <div className="flex-1 w-full relative h-full overflow-y-auto">
-        <div className={`transition-all duration-500 ${activeTab === 'ninos' ? 'opacity-100 translate-x-0 block' : 'opacity-0 -translate-x-4 hidden'}`}>
-          <ReportsNinos />
-        </div>
-        <div className={`transition-all duration-500 ${activeTab === 'cuidadores' ? 'opacity-100 translate-x-0 block' : 'opacity-0 translate-x-4 hidden'}`}>
-          <ReportsCuidadores />
-        </div>
+      {/* Content */}
+      <div className="px-4 pb-4 flex-1">
+        {activeTab === 'ninos' ? <ReportsNinos /> : <ReportsCuidadores />}
       </div>
     </div>
   );

@@ -81,7 +81,7 @@ function buildExcel(cuidadores: Cuidador[], allAsistencias: AsistenciaCuidador[]
     { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
     { wch: 24 }, { wch: 18 },
   ];
-  XLSX.utils.book_append_sheet(wb, wssummary, 'Faltantes por Niño');
+  XLSX.utils.book_append_sheet(wb, wssummary, 'Faltantes por Cuidador');
   return wb;
 }
 
@@ -401,7 +401,7 @@ export default function ReportsCuidadores() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
         <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Calendar size={13} />
-          Historial por niño
+          Historial por Cuidador
         </p>
 
         {/* Buscador */}
@@ -410,7 +410,7 @@ export default function ReportsCuidadores() {
             <Search size={16} className="text-slate-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Buscar niño por nombre..."
+              placeholder="Buscar cuidador por nombre..."
               value={childSearch}
               onChange={e => { setChildSearch(e.target.value); setShowDropdown(true); setSelectedNino(null); }}
               onFocus={() => setShowDropdown(true)}
@@ -484,7 +484,7 @@ export default function ReportsCuidadores() {
         }
       </button>
       <p className="text-xs text-slate-400 text-center -mt-3 font-medium">
-        2 hojas: AsistenciaCuidador por Día · Faltantes por Niño
+        2 hojas: AsistenciaCuidador por Día · Faltantes por Cuidador
       </p>
 
       {/* ── Pestañas ─────────────────────────────────────────────────────────── */}
