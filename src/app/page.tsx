@@ -22,27 +22,27 @@ export default function Home() {
       </main>
 
       {/* Bottom Navigation for Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around px-2 py-3 z-10 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around px-2 py-2 z-10 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)]">
         <button 
           onClick={() => setActiveTab('attendance')}
-          className={`flex flex-col items-center gap-1 w-full py-1 rounded-xl transition-colors ${activeTab === 'attendance' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+          className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl transition-colors ${activeTab === 'attendance' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
         >
-          <ClipboardList size={24} />
-          <span className="text-xs font-bold">Asistencia</span>
+          <ClipboardList size={20} className="mb-0.5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Asistencia</span>
         </button>
         <button 
           onClick={() => setActiveTab('reports')}
-          className={`flex flex-col items-center gap-1 w-full py-1 rounded-xl transition-colors ${activeTab === 'reports' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+          className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl transition-colors ${activeTab === 'reports' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
         >
-          <Users size={24} />
-          <span className="text-xs font-bold">Reportes</span>
+          <Users size={20} className="mb-0.5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Reportes</span>
         </button>
         <button 
           onClick={() => setActiveTab('import')}
-          className={`flex flex-col items-center gap-1 w-full py-1 rounded-xl transition-colors ${activeTab === 'import' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+          className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl transition-colors ${activeTab === 'import' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
         >
-          <Database size={24} />
-          <span className="text-xs font-bold">Datos</span>
+          <Database size={20} className="mb-0.5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Datos</span>
         </button>
       </nav>
     </div>
