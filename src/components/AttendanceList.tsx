@@ -597,25 +597,25 @@ export default function AttendanceList() {
                     </div>
 
                     {/* Botones de asistencia */}
-                    <div className={`flex bg-slate-100 rounded-full p-1 border border-slate-200 shadow-inner flex-shrink-0 transition-opacity ${isSaving ? 'opacity-60' : 'opacity-100'}`}>
+                    <div className={`flex bg-slate-100 rounded-full p-0.5 border border-slate-200 shadow-inner flex-shrink-0 transition-opacity ${isSaving ? 'opacity-60' : 'opacity-100'}`}>
                       <button
                         onClick={() => !isSaving && toggleAttendance(nino.id, true)}
                         disabled={isSaving}
-                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${isPresent ? 'bg-emerald-500 text-white shadow-md scale-105' : 'text-slate-500 hover:bg-slate-200'}`}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${isPresent ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}
                       >
                         {isSaving && isPresent
-                          ? <Loader2 size={14} className="animate-spin" />
-                          : <CheckCircle2 size={15} className={isPresent ? 'text-white' : 'text-emerald-500'} />}
+                          ? <Loader2 size={12} className="animate-spin" />
+                          : <CheckCircle2 size={14} className={isPresent ? 'text-white' : 'text-emerald-500'} />}
                         Sí
                       </button>
                       <button
                         onClick={() => !isSaving && toggleAttendance(nino.id, false)}
                         disabled={isSaving}
-                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full font-bold text-xs transition-all ${isAbsent ? 'bg-rose-500 text-white shadow-md scale-105' : 'text-slate-500 hover:bg-slate-200'}`}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${isAbsent ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}
                       >
                         {isSaving && isAbsent
-                          ? <Loader2 size={14} className="animate-spin" />
-                          : <XCircle size={15} className={isAbsent ? 'text-white' : 'text-rose-500'} />}
+                          ? <Loader2 size={12} className="animate-spin" />
+                          : <XCircle size={14} className={isAbsent ? 'text-white' : 'text-rose-500'} />}
                         No
                       </button>
                     </div>
@@ -638,9 +638,9 @@ export default function AttendanceList() {
                     </div>
                     <button
                       onClick={() => setEditingNino(nino)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-full transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-full transition-all flex-shrink-0"
                     >
-                      <UserCog size={13} />
+                      <UserCog size={12} />
                       {hasGuardian ? 'Editar' : 'Completar'}
                     </button>
                   </div>
