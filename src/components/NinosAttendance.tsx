@@ -8,6 +8,7 @@ import {
 import { supabase } from '@/lib/supabaseClient';
 import { IS_MOCK_MODE, MOCK_NINOS, MOCK_ASISTENCIAS } from '@/lib/mockData';
 import { getTodayLocalStr } from '@/lib/dateUtils';
+import { toTitleCase } from '@/lib/stringUtils';
 import { useOnlineStatus } from '@/lib/useOnlineStatus';
 import {
   enqueue, dequeue, getQueue, pendingCount as getPendingCount,
@@ -231,7 +232,12 @@ export default function NinosAttendance() {
 
     // Sin conexión: carga desde caché local
     if (!isOnline) {
-      const cachedNinos = loadNinosCache();
+      const cachedNinos = loadNinosCache().map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+        acudiente_nombre: toTitleCase(n.acudiente_nombre)
+      }));
       const cachedAsist = loadAsistenciasCache(todayStr);
       setNinos(cachedNinos.length ? cachedNinos : []);
       setAsistencias(cachedAsist);
@@ -252,7 +258,12 @@ export default function NinosAttendance() {
       if (ninosRes.error) throw new Error(`Error tabla ninos: ${ninosRes.error.message}`);
       if (asistRes.error) throw new Error(`Error tabla asistencia: ${asistRes.error.message}`);
 
-      const data = ninosRes.data || [];
+      const data = (ninosRes.data || []).map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+        acudiente_nombre: toTitleCase(n.acudiente_nombre)
+      }));
 
       if (data.length === 0) {
         setDiagError(
@@ -280,7 +291,12 @@ export default function NinosAttendance() {
       setDiagError(`Error de conexión: ${msg}`);
 
       // Fallback a caché local
-      const cached = loadNinosCache();
+      const cached = loadNinosCache().map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+        acudiente_nombre: toTitleCase(n.acudiente_nombre)
+      }));
       setNinos(cached.length ? cached : MOCK_NINOS);
       setAsistencias(loadAsistenciasCache(todayStr));
       setPending(getPendingCount());

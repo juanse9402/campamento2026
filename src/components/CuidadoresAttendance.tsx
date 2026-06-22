@@ -8,6 +8,7 @@ import {
 import { supabase } from '@/lib/supabaseClient';
 import { IS_MOCK_MODE } from '@/lib/mockData';
 import { getTodayLocalStr } from '@/lib/dateUtils';
+import { toTitleCase } from '@/lib/stringUtils';
 import { useOnlineStatus } from '@/lib/useOnlineStatus';
 import {
   enqueueCuidador, dequeueCuidador, getCuidadoresQueue, pendingCuidadoresCount,
@@ -148,7 +149,11 @@ export default function CuidadoresAttendance() {
 
     // Sin conexión: carga desde caché local
     if (!isOnline) {
-      const cachedNinos = loadCuidadoresCache();
+      const cachedNinos = loadCuidadoresCache().map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+      }));
       const cachedAsist = loadAsistenciasCuidadoresCache(todayStr);
       setCuidadores(cachedNinos.length ? cachedNinos : []);
       setAsistencias(cachedAsist);
@@ -169,14 +174,22 @@ export default function CuidadoresAttendance() {
       if (ninosRes.error) throw new Error(`Error tabla ninos: ${ninosRes.error.message}`);
       if (asistRes.error) throw new Error(`Error tabla asistencia: ${asistRes.error.message}`);
 
-      const data = ninosRes.data || [];
+      const data = (ninosRes.data || []).map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+      }));
 
       if (data.length === 0) {
         setDiagError(
           'Supabase respondió sin error pero devolvió 0 niños. ' +
           'Verifica las políticas RLS de la tabla "ninos".'
         );
-        const cached = loadCuidadoresCache();
+        const cached = loadCuidadoresCache().map(n => ({
+          ...n,
+          nombre: toTitleCase(n.nombre),
+          apellido: toTitleCase(n.apellido),
+        }));
         setCuidadores(cached.length ? cached : []);
         setAsistencias(loadAsistenciasCuidadoresCache(todayStr));
       } else {
@@ -197,7 +210,11 @@ export default function CuidadoresAttendance() {
       setDiagError(`Error de conexión: ${msg}`);
 
       // Fallback a caché local
-      const cached = loadCuidadoresCache();
+      const cached = loadCuidadoresCache().map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+      }));
       setCuidadores(cached.length ? cached : []);
       setAsistencias(loadAsistenciasCuidadoresCache(todayStr));
       setPending(pendingCuidadoresCount());

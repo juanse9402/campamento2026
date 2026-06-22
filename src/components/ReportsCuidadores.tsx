@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabaseClient';
 import { IS_MOCK_MODE } from '@/lib/mockData';
 import { getTodayLocalStr } from '@/lib/dateUtils';
+import { toTitleCase } from '@/lib/stringUtils';
 import { Cuidador, AsistenciaCuidador } from '@/types';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
@@ -264,7 +265,12 @@ export default function ReportsCuidadores() {
       ]);
       if (ninosRes.error) throw ninosRes.error;
       if (asistRes.error) throw asistRes.error;
-      setCuidadores(ninosRes.data || []);
+      const data = (ninosRes.data || []).map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+      }));
+      setCuidadores(data);
       const asistMap: Record<string, AsistenciaCuidador> = {};
       (asistRes.data || []).forEach(a => { asistMap[a.cuidador_id] = a; });
       setAsistencias(asistMap);

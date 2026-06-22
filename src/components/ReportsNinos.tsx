@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabaseClient';
 import { IS_MOCK_MODE, MOCK_NINOS, MOCK_ASISTENCIAS } from '@/lib/mockData';
 import { getTodayLocalStr } from '@/lib/dateUtils';
+import { toTitleCase } from '@/lib/stringUtils';
 import { Nino, Asistencia } from '@/types';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
@@ -252,8 +253,8 @@ export default function ReportsNinos() {
   const fetchData = async () => {
     setLoading(true);
     if (IS_MOCK_MODE) {
-      setNinos(MOCK_NINOS);
-      setAsistencias(MOCK_ASISTENCIAS);
+      setNinos([]);
+      setAsistencias({});
       setLoading(false);
       return;
     }
@@ -264,14 +265,20 @@ export default function ReportsNinos() {
       ]);
       if (ninosRes.error) throw ninosRes.error;
       if (asistRes.error) throw asistRes.error;
-      setNinos(ninosRes.data || []);
+      const data = (ninosRes.data || []).map(n => ({
+        ...n,
+        nombre: toTitleCase(n.nombre),
+        apellido: toTitleCase(n.apellido),
+        acudiente_nombre: toTitleCase(n.acudiente_nombre)
+      }));
+      setNinos(data);
       const asistMap: Record<string, Asistencia> = {};
       (asistRes.data || []).forEach(a => { asistMap[a.nino_id] = a; });
       setAsistencias(asistMap);
     } catch (err) {
       console.error(err);
-      setNinos(MOCK_NINOS);
-      setAsistencias(MOCK_ASISTENCIAS);
+      setNinos([]);
+      setAsistencias({});
     } finally {
       setLoading(false);
     }
