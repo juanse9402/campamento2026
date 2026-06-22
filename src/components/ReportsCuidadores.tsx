@@ -228,6 +228,7 @@ export default function ReportsCuidadores() {
   const [selectedGrupo, setSelectedGrupo] = useState('Todos');
   const [callStatus, setCallStatus]   = useState<Record<string, CallStatus>>({});
   const [exporting, setExporting]     = useState(false);
+  const [listSearch, setListSearch]   = useState('');
 
   // Reporte por niño
   const [childSearch, setChildSearch]   = useState('');
@@ -320,7 +321,9 @@ export default function ReportsCuidadores() {
   const absentNinos  = ninosByGrupo.filter(n => {
     const s = asistencias[n.id]; return !s || s.asistio === false;
   });
-  const displayedNinos = filter === 'all' ? ninosByGrupo : absentNinos;
+  const displayedNinos = (filter === 'all' ? ninosByGrupo : absentNinos).filter(n =>
+    `${n.nombre} ${n.apellido}`.toLowerCase().includes(listSearch.toLowerCase())
+  );
 
   const grupoSummary = (g: string) => {
     const subset = g === 'Todos' ? cuidadores : cuidadores.filter(n => (n.grupo ?? '').toUpperCase() === g);
@@ -512,6 +515,20 @@ export default function ReportsCuidadores() {
             </span>
           )}
         </button>
+      </div>
+
+      {/* ── Búsqueda en Lista ────────────────────────────────────────────────── */}
+      <div className="relative shadow-sm rounded-xl bg-white overflow-hidden border border-slate-200 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-200 transition-all mt-3">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-slate-400" />
+        </div>
+        <input
+          type="text"
+          className="block w-full pl-9 pr-3 py-2.5 bg-transparent border-0 text-slate-900 placeholder:text-slate-400 focus:ring-0 text-sm font-medium"
+          placeholder="Buscar cuidador en la lista..."
+          value={listSearch}
+          onChange={e => setListSearch(e.target.value)}
+        />
       </div>
 
       {/* ── Lista ──────────────────────────────────────────────────────────── */}
