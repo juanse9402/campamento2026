@@ -9,7 +9,7 @@ export default function AttendanceList() {
   return (
     <div className="flex flex-col h-full bg-slate-50">
       {/* Top Navigation Tabs */}
-      <div className="px-4 pt-4 pb-2 bg-slate-50 sticky top-0 z-20">
+      <div className="px-4 pt-4 pb-2 bg-slate-50 relative z-20">
         <div className="flex bg-slate-200/60 p-1 rounded-xl shadow-inner border border-slate-200/50">
           <button
             onClick={() => setActiveTab('ninos')}
